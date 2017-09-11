@@ -49,6 +49,11 @@ endpoints:
         type: object
         description: data to pass to object create
         required: true
+      token:
+        type: string
+        description: token from logged in user
+        example: 83u178rh82gry818gr#$
+        required: false
     response:
       mimetype: text/plain
       examples:
@@ -78,6 +83,41 @@ endpoints:
         type: object
         description: data to pass to object update
         required: true
+      token:
+        type: string
+        description: token from logged in user
+        example: 83u178rh82gry818gr#$
+        required: false
+    response:
+      mimetype: text/plain
+      examples:
+        -
+          exit_code: 200
+          description: Success
+          example: Hello Tyler Durden!
+        -
+          exit_code: 400
+          description: Failed
+          example: No first name or last name provided :y
+  remove:
+    description: Remove object from database 
+    file: scripts/delete.js
+    parameters:
+      model:
+        type: string
+        description: name of class to remove object from
+        example: strings
+        required: true
+      id:
+        type: integer
+        description: id of object
+        example: 13
+        required: true
+      token:
+        type: string
+        description: token from logged in user
+        example: 83u178rh82gry818gr#$
+        required: false
     response:
       mimetype: text/plain
       examples:
