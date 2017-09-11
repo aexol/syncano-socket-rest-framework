@@ -1,0 +1,91 @@
+name: rest-framework
+description: Description of rest-framework
+version: 0.0.1
+
+config:
+  PERMISSIONS:
+    description: Table of permissions
+    required: false
+  OBJECT_PERMISSIONS:
+    description: Table of object permissions
+    required: false
+endpoints:
+  list:
+    description: List models in database
+    file: scripts/list.js
+    parameters:
+      model:
+        type: string
+        description: name of class to get list
+        example: strings
+        required: true
+      token:
+        type: string
+        description: token from logged in user
+        example: 83u178rh82gry818gr#$
+        required: false
+    response:
+      mimetype: text/plain
+      examples:
+        -
+          exit_code: 200
+          description: Success
+          example: Hello Tyler Durden!
+        -
+          exit_code: 400
+          description: Failed
+          example: No first name or last name provided :y
+  
+  add:
+    description: Add object to database 
+    file: scripts/add.js
+    parameters:
+      model:
+        type: string
+        description: name of class to create object from
+        example: strings
+        required: true
+      data:
+        type: object
+        description: data to pass to object create
+        required: true
+    response:
+      mimetype: text/plain
+      examples:
+        -
+          exit_code: 200
+          description: Success
+          example: Hello Tyler Durden!
+        -
+          exit_code: 400
+          description: Failed
+          example: No first name or last name provided :y
+  update:
+    description: Update object in database 
+    file: scripts/update.js
+    parameters:
+      model:
+        type: string
+        description: name of class to create object from
+        example: strings
+        required: true
+      id:
+        type: integer
+        description: id of object
+        example: 13
+        required: true
+      data:
+        type: object
+        description: data to pass to object update
+        required: true
+    response:
+      mimetype: text/plain
+      examples:
+        -
+          exit_code: 200
+          description: Success
+          example: Hello Tyler Durden!
+        -
+          exit_code: 400
+          description: Failed
+          example: No first name or last name provided :y
