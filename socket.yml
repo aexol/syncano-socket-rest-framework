@@ -1,6 +1,10 @@
 name: rest-framework
-description: Description of rest-framework
-version: 0.0.1
+description: |
+  Simple rest framework for managing objects. 
+  Ready to use endpoints in your client app for adding, updating, listing, deleting your model.
+  To start using it just add your allowed model class names.
+  Comes with built-in configurable permissions system.
+version: 0.0.2
 
 config:
   PERMISSIONS:
@@ -9,6 +13,9 @@ config:
   OBJECT_PERMISSIONS:
     description: Table of object permissions
     required: false
+  ALLOWED_MODELS:
+    description: Classes allowed to be used in rest-framework
+    required: true
 endpoints:
   list:
     description: List models in database
@@ -30,11 +37,21 @@ endpoints:
         -
           exit_code: 200
           description: Success
-          example: Hello Tyler Durden!
+          example: |
+            [
+              {
+                id: 1,
+                name: 'first_item'
+              },
+              {
+                id: 2,
+                name: 'second_item'
+              }
+            ]
         -
-          exit_code: 400
-          description: Failed
-          example: No first name or last name provided :y
+          exit_code: 403
+          description: Unauthorized
+          example: You don't have permission
   
   add:
     description: Add object to database 
@@ -60,11 +77,15 @@ endpoints:
         -
           exit_code: 200
           description: Success
-          example: Hello Tyler Durden!
+          example: |
+            {
+              id: 1,
+              name: 'object_name'
+            }
         -
-          exit_code: 400
-          description: Failed
-          example: No first name or last name provided :y
+          exit_code: 403
+          description: Unauthorized
+          example: You don't have permission
   update:
     description: Update object in database 
     file: scripts/update.js
@@ -94,11 +115,15 @@ endpoints:
         -
           exit_code: 200
           description: Success
-          example: Hello Tyler Durden!
+          example: |
+            {
+              id: 1,
+              name: 'object_name'
+            }
         -
-          exit_code: 400
-          description: Failed
-          example: No first name or last name provided :y
+          exit_code: 403
+          description: Unauthorized
+          example: You don't have permission
   remove:
     description: Remove object from database 
     file: scripts/delete.js
@@ -124,8 +149,12 @@ endpoints:
         -
           exit_code: 200
           description: Success
-          example: Hello Tyler Durden!
+          example: |
+            {
+              id: 1,
+              name: 'object_name'
+            }
         -
-          exit_code: 400
-          description: Failed
-          example: No first name or last name provided :y
+          exit_code: 403
+          description: Unauthorized
+          example: You don't have permission

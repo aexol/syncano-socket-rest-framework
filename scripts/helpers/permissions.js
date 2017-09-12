@@ -1,12 +1,16 @@
 import { data, users, socket, response, event, logger } from 'syncano-server';
 const {
     PERMISSIONS = [],
-    OBJECT_PERMISSIONS = []
+    OBJECT_PERMISSIONS = [],
+    ALLOWED_MODELS = []
 } = CONFIG;
 function hasPermission(o,p){
     return o.permission_type.indexOf(p) !== -1;
 }
 export async function getPermissions(model, permission_type, token){
+    if(ALLOWED_MODELS.indexOf(model) === -1){
+        return false
+    }
     try{
         const definedGlobalPermissions = PERMISSIONS.filter(p => hasPermission(p,permission_type) && p.class_name === model);
         let user;
