@@ -23,7 +23,7 @@ async function updateModel () {
   }
 }
 async function update () {
-  const canUpdate = await getPermissions(model, 'c')
+  const canUpdate = await getPermissions(model, 'u')
   if (canUpdate.user) {
     await updateUserModel(canUpdate)
   }

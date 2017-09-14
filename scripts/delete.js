@@ -23,7 +23,7 @@ async function deleteModel () {
   }
 }
 async function del () {
-  const canDelete = await getPermissions(model, 'c')
+  const canDelete = await getPermissions(model, 'd')
   if (canDelete.user) {
     await deleteUserModel(canDelete)
   }
