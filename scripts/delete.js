@@ -1,43 +1,35 @@
-import { data, users, socket, response, event, logger } from 'syncano-server'
-const {
-    model,
-    id,
-    token
-} = ARGS
-import { getPermissions } from './helpers/permissions.js';
+import {data, users, socket, response, event, logger} from 'syncano-server'
+const {model, id } = ARGS
+import {getPermissions} from './helpers/permissions.js'
 
-del();
+del()
 
-function deleteUserModel({ user, owner }){
-    data[model]
-    .where(owner, user)
-    .where('id',id)
-    .firstOrFail()
-    .then(model => {
-        deleteModel();
-    })
-    .catch(({data}) => {
-        response.json(data)
-    })
+async function deleteUserModel ({user, owner}) {
+  try {
+    let ownedModel = await data[model]
+      .where(owner, user)
+      .where('id', id)
+      .firstOrFail()
+    await deleteModel()
+  } catch (error) {
+    response.json(error)
+  }
 }
-function deleteModel(){
-    data[model]
-    .delete(id)
-    .then(model => {
-        response.json(model)
-    })
-    .catch(({data}) => {
-        response.json(data)
-    })
+async function deleteModel () {
+  try {
+    response.json(await data[model].delete(id))
+  } catch (error) {
+    response.json(error)
+  }
 }
-async function del(){
-    const canDelete = await getPermissions(model,'c',token)
-    if(canDelete.user){
-        deleteUserModel();
-    }
-    if(canDelete){
-        deleteModel()
-    }else{
-        response.json("Insufficent privileges")
-    }
+async function del () {
+  const canDelete = await getPermissions(model, 'c')
+  if (canDelete.user) {
+    await deleteUserModel(canDelete)
+  }
+  if (canDelete) {
+    await deleteModel()
+  } else {
+    response.json('Insufficent privileges')
+  }
 }

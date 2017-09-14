@@ -1,28 +1,20 @@
-import { data, users, socket, response, event, logger } from 'syncano-server'
-const {
-    model,
-    token,
-} = ARGS;
-const modelData = JSON.parse(ARGS.data);
-import { getPermissions } from './helpers/permissions.js'
-function addModel(){
-    data[model]
-    .create({
-        ...modelData
-    })
-    .then(model => {
-        response.json(model)
-    })
-    .catch(({data}) => {
-        response.json(data)
-    })
+import {data, users, socket, response, event, logger} from 'syncano-server'
+const {model} = ARGS
+const modelData = typeof ARGS.data === "string" ? JSON.parse(ARGS.data) : ARGS.data;
+import {getPermissions} from './helpers/permissions.js'
+async function addModel () {
+  try {
+    response.json(await data[model].create(modelData));
+  } catch (error) {
+    response.json(error)
+  }
 }
-async function create(){
-    const canCreate = await getPermissions(model,'c',token);
-    if(canCreate){
-        addModel()
-    }else{
-        response.json("Insufficent privileges")
-    }
+async function create () {
+  const canCreate = await getPermissions(model, 'c')
+  if (canCreate) {
+    addModel()
+  } else {
+    response.json('Insufficent privileges')
+  }
 }
-create();
+create()

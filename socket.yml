@@ -1,22 +1,80 @@
 name: rest-framework
 description: |
-  Simple rest framework for managing objects. 
-  Ready to use endpoints in your client app for adding, updating, listing, deleting your model.
-  To start using it just add your allowed model class names.
-  Comes with built-in configurable permissions system.
-version: 0.0.2
-
+  Ready to use endpoints in your client app for adding, updating, listing,
+  deleting your model.
+version: 0.0.7
+keywords:
+  - rest
+  - rf
+  - framework
+  - model
+  - object
+  - view
+  - permissions
+  - permission
+  - views
+  - model
+  - classes
+  - class
+  - socket
+  - aexol
+  - artur
+  - czemiel
 config:
-  PERMISSIONS:
-    description: Table of permissions
-    required: false
-  OBJECT_PERMISSIONS:
-    description: Table of object permissions
-    required: false
-  ALLOWED_MODELS:
-    description: Classes allowed to be used in rest-framework
+  REST_FRAMEWORK_KEY:
+    description: |
+      Your secret key for configuration options
+      Example: 1je1je9jqw9j891r8wp89rh8p#!$!#4-1341
     required: true
+classes:
+  rest_framework_config_class:
+    - name: config
+      type: object
 endpoints:
+  getconfig:
+    description: Get rest api configuration
+    file: scripts/getconfig.js
+    parameters:
+      key:
+        type: string
+        description: your REST_FRAMEWORK_KEY
+        example: 13-31sd1je1je9jqw9j891r8wp89rh8p
+  configure:
+    description: Create permissions config
+    file: scripts/configure.js
+    parameters:
+      key:
+        type: string
+        description: your REST_FRAMEWORK_KEY
+        example: 13-31sd1je1je9jqw9j891r8wp89rh8p
+      config:
+        type: object
+        description: config js object
+        example: |
+          {
+            models: ["book","credentials","author","page"],
+            logged_in: [
+              {
+                model: "book",
+                type: "cud"
+              },
+              {
+                model: "credentials",
+                type: "rcud"
+              },
+              {
+                model: "author",
+                type: "c"
+              }
+            ],
+            object_level: [
+              {
+                model: "author",
+                type: "ud",
+                owner_field: "user"
+              }
+            ]
+          }
   list:
     description: List models in database
     file: scripts/list.js
@@ -26,16 +84,10 @@ endpoints:
         description: name of class to get list
         example: strings
         required: true
-      token:
-        type: string
-        description: token from logged in user
-        example: 83u178rh82gry818gr#$
-        required: false
     response:
       mimetype: text/plain
       examples:
-        -
-          exit_code: 200
+        - exit_code: 200
           description: Success
           example: |
             [
@@ -48,13 +100,11 @@ endpoints:
                 name: 'second_item'
               }
             ]
-        -
-          exit_code: 403
+        - exit_code: 403
           description: Unauthorized
           example: You don't have permission
-  
   add:
-    description: Add object to database 
+    description: Add object to database
     file: scripts/add.js
     parameters:
       model:
@@ -65,29 +115,26 @@ endpoints:
       data:
         type: object
         description: data to pass to object create
-        required: true
-      token:
-        type: string
-        description: token from logged in user
-        example: 83u178rh82gry818gr#$
         required: false
+        example: |
+          {
+            "name":"hello"
+          }
     response:
       mimetype: text/plain
       examples:
-        -
-          exit_code: 200
+        - exit_code: 200
           description: Success
           example: |
             {
               id: 1,
               name: 'object_name'
             }
-        -
-          exit_code: 403
+        - exit_code: 403
           description: Unauthorized
           example: You don't have permission
   update:
-    description: Update object in database 
+    description: Update object in database
     file: scripts/update.js
     parameters:
       model:
@@ -104,28 +151,21 @@ endpoints:
         type: object
         description: data to pass to object update
         required: true
-      token:
-        type: string
-        description: token from logged in user
-        example: 83u178rh82gry818gr#$
-        required: false
     response:
       mimetype: text/plain
       examples:
-        -
-          exit_code: 200
+        - exit_code: 200
           description: Success
           example: |
             {
               id: 1,
               name: 'object_name'
             }
-        -
-          exit_code: 403
+        - exit_code: 403
           description: Unauthorized
           example: You don't have permission
   remove:
-    description: Remove object from database 
+    description: Remove object from database
     file: scripts/delete.js
     parameters:
       model:
@@ -138,23 +178,16 @@ endpoints:
         description: id of object
         example: 13
         required: true
-      token:
-        type: string
-        description: token from logged in user
-        example: 83u178rh82gry818gr#$
-        required: false
     response:
       mimetype: text/plain
       examples:
-        -
-          exit_code: 200
+        - exit_code: 200
           description: Success
           example: |
             {
               id: 1,
               name: 'object_name'
             }
-        -
-          exit_code: 403
+        - exit_code: 403
           description: Unauthorized
           example: You don't have permission

@@ -1,46 +1,35 @@
-import { data, users, socket, response, event, logger } from 'syncano-server'
-const {
-    model,
-    id,
-    token
-} = ARGS
-const modelData = JSON.parse(ARGS.data);
-import { getPermissions } from './helpers/permissions.js';
+import {data, users, socket, response, event, logger} from 'syncano-server'
+const {model, id} = ARGS
+const modelData = typeof ARGS.data === "string" ? JSON.parse(ARGS.data) : ARGS.data;
+import {getPermissions} from './helpers/permissions.js'
+update()
 
-update();
-
-function updateUserModel({ user, owner }){
-    data[model]
-    .where(owner, user)
-    .where('id',id)
-    .firstOrFail()
-    .then(model => {
-        updateModel();
-    })
-    .catch(({data}) => {
-        response.json(data)
-    })
+async function updateUserModel ({user, owner}) {
+  try {
+    let ownedModel = await data[model]
+      .where(owner, user)
+      .where('id', id)
+      .firstOrFail()
+    await updateModel()
+  } catch (error) {
+    response.json(error)
+  }
 }
-function updateModel(){
-    data[model]
-    .update(id,{
-        ...modelData
-    })
-    .then(model => {
-        response.json(model)
-    })
-    .catch(({data}) => {
-        response.json(data)
-    })
+async function updateModel () {
+  try {
+    response.json(await data[model].update(id, modelData))
+  } catch (error) {
+    response.json(error)
+  }
 }
-async function update(){
-    const canUpdate = await getPermissions(model,'c',token)
-    if(canUpdate.user){
-        updateUserModel();
-    }
-    if(canUpdate){
-        updateModel()
-    }else{
-        response.json("Insufficent privileges")
-    }
+async function update () {
+  const canUpdate = await getPermissions(model, 'c')
+  if (canUpdate.user) {
+    await updateUserModel(canUpdate)
+  }
+  if (canUpdate) {
+    await updateModel()
+  } else {
+    response.json('Insufficent privileges')
+  }
 }
