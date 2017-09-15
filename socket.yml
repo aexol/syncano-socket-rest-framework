@@ -2,7 +2,7 @@ name: rest-framework
 description: |
   Ready to use endpoints in your client app for adding, updating, listing,
   deleting your model.
-version: 0.0.8
+version: 0.0.9
 keywords:
   - rest
   - rf
