@@ -1,27 +1,5 @@
-import {data, users, socket, response, event, logger} from 'syncano-server'
-const {user} = META
-function hasPermission (o, p) {
-  return o.type.indexOf(p) !== -1
-}
-function notLoggedIn () {
-  response.json({
-    status: 403,
-    error: 'User not logged in'
-  })
-}
-function notAnOwner () {
-  response.json({
-    status: 403,
-    error: 'This user is not an owner user of this model'
-  })
-}
-function notInModels () {
-  response.json({
-    status: 403,
-    error: 'This model is not added to rest-framework socket config. Please add it to models'
-  })
-}
-export async function getPermissions (model, permission_type) {
+export async function getPermissions (model, permission_type, user, server) {
+  const {data, response} = server
   const ccc = await getConfig()
   const {models = [], logged_in = [], object_level = []} = ccc
   if (models.indexOf(model) === -1) {
@@ -55,13 +33,34 @@ export async function getPermissions (model, permission_type) {
   } catch ({data}) {
     return true
   }
-}
-async function getConfig () {
-  try {
-    return (await data.rest_framework_config_class.firstOrFail()).config
-  } catch (badResponse) {
+  function hasPermission (o, p) {
+    return o.type.indexOf(p) !== -1
+  }
+  function notLoggedIn (response) {
     response.json({
-      status: 'No config. Please configure rest framework: s call rest-framework/configure'
+      status: 403,
+      error: 'User not logged in'
     })
+  }
+  function notAnOwner (response) {
+    response.json({
+      status: 403,
+      error: 'This user is not an owner user of this model'
+    })
+  }
+  function notInModels (response) {
+    response.json({
+      status: 403,
+      error: 'This model is not added to rest-framework socket config. Please add it to models'
+    })
+  }
+  async function getConfig () {
+    try {
+      return (await data.rest_framework_config_class.firstOrFail()).config
+    } catch (badResponse) {
+      response.json({
+        status: 'No config. Please configure rest framework: s call rest-framework/configure'
+      })
+    }
   }
 }

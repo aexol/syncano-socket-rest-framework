@@ -2,7 +2,7 @@ name: rest-framework
 description: |
   Ready to use endpoints in your client app for adding, updating, listing,
   deleting your model.
-version: 0.0.9
+version: 0.0.25
 keywords:
   - rest
   - rf
@@ -33,7 +33,7 @@ classes:
 endpoints:
   getconfig:
     description: Get rest api configuration
-    file: scripts/getconfig.js
+    file: getconfig.js
     parameters:
       key:
         type: string
@@ -41,7 +41,7 @@ endpoints:
         example: 13-31sd1je1je9jqw9j891r8wp89rh8p
   configure:
     description: Create permissions config
-    file: scripts/configure.js
+    file: configure.js
     parameters:
       key:
         type: string
@@ -77,7 +77,7 @@ endpoints:
           }
   list:
     description: List models in database
-    file: scripts/list.js
+    file: list.js
     parameters:
       model:
         type: string
@@ -105,7 +105,7 @@ endpoints:
           example: You don't have permission
   add:
     description: Add object to database
-    file: scripts/add.js
+    file: add.js
     parameters:
       model:
         type: string
@@ -114,12 +114,16 @@ endpoints:
         required: true
       data:
         type: object
-        description: data to pass to object create
-        required: false
+        description: 'Data for object create,'
         example: |
           {
-            "name":"hello"
+            name:"blabla123",
+            some_file_field:{
+              type:"file",
+              value:"data:image/gif;base64,R0lGODlhAQABAAAAACw="
+            }
           }
+        required: false
     response:
       mimetype: text/plain
       examples:
@@ -128,14 +132,18 @@ endpoints:
           example: |
             {
               id: 1,
-              name: 'object_name'
+              name: 'blabla123',
+              some_file_field: {
+                type: "file",
+                value: "https://d3rij3t703q5l6.cloudfront.net/31061/9/ddy12tbv16d168vv618rd1v.png"
+              }
             }
         - exit_code: 403
           description: Unauthorized
           example: You don't have permission
   update:
     description: Update object in database
-    file: scripts/update.js
+    file: update.js
     parameters:
       model:
         type: string
@@ -149,8 +157,16 @@ endpoints:
         required: true
       data:
         type: object
-        description: data to pass to object update
-        required: true
+        description: 'Data for object update,'
+        example: |
+          {
+            name: "new text",
+            some_file_field: {
+                type: "file",
+                value: "https://d3rij3t703q5l6.cloudfront.net/31061/9/ddy12tbv16d168vv618rd1v.png"
+              }
+          }
+        required: false
     response:
       mimetype: text/plain
       examples:
@@ -159,14 +175,14 @@ endpoints:
           example: |
             {
               id: 1,
-              name: 'object_name'
+              name: 'new text'
             }
         - exit_code: 403
           description: Unauthorized
           example: You don't have permission
   remove:
     description: Remove object from database
-    file: scripts/delete.js
+    file: delete.js
     parameters:
       model:
         type: string
@@ -178,6 +194,48 @@ endpoints:
         description: id of object
         example: 13
         required: true
+    response:
+      mimetype: text/plain
+      examples:
+        - exit_code: 200
+          description: Success
+          example: |
+            {
+              id: 1,
+              name: 'object_name'
+            }
+        - exit_code: 403
+          description: Unauthorized
+          example: You don't have permission
+  migrate:
+    description: Install whole objects table to your rest-framework/database
+    file: migrate.js
+    parameters:
+      model:
+        type: string
+        description: name of class to remove object from
+        example: strings
+        required: true
+      link:
+        type: string
+        description: public link to another rest object service
+        example: 'http://restservice.com/mymodel/objects/'
+        required: true
+      key:
+        type: string
+        description: your REST_FRAMEWORK_KEY
+        example: 231431dsaojdsaiur47813t
+        required: true
+      header:
+        type: string
+        description: Name of the header for authorization in your link
+        example: 'Authorization:'
+        required: false
+      token:
+        type: string
+        description: Token needed for authorization in your link
+        example: dadsa17623t61374y1hsauij
+        required: false
     response:
       mimetype: text/plain
       examples:
