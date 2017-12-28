@@ -1,29 +1,21 @@
-import {transform} from './helpers/transform'
-import {getPermissions} from './helpers/permissions.js'
-import Server from 'syncano-server'
-export default ctx => {
+import { getPermissions } from './helpers/permissions.js'
+import Server from '@syncano/core'
+import { toFormData } from './helpers/utils'
+import { errors } from './helpers/messages'
+export default async ctx => {
   const server = Server(ctx)
-  const {data, users, socket, response, event, logger, instance} = server
-  const {model} = ctx.args
-  const modelData = transform(
-    typeof ctx.args.data === 'string'
-      ? JSON.parse(ctx.args.data)
-      : ctx.args.data
-  )
-  async function addModel () {
-    try {
-      response.json(await data[model].create(modelData))
-    } catch (error) {
-      response.json(error)
-    }
-  }
-  async function create () {
-    const canCreate = await getPermissions(model, 'c', ctx.meta.user, server)
+  const { data, response } = server
+  const { model, ...modelData } = ctx.args
+  try {
+    const canCreate = await getPermissions('c', ctx)
     if (canCreate) {
-      addModel()
+      return response.json(
+        await data[model].create(toFormData(modelData))
+      )
     } else {
-      response.json('Insufficent privileges')
+      return response.json({ message: errors(403) }, 403)
     }
+  } catch (error) {
+    return response.json({ message: error.message }, 400)
   }
-  create()
 }

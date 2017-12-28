@@ -2,7 +2,7 @@ name: rest-framework
 description: |
   Ready to use endpoints in your client app for adding, updating, listing,
   deleting your model.
-version: 0.0.25
+version: 0.0.38
 keywords:
   - rest
   - rf
@@ -21,16 +21,71 @@ keywords:
   - artur
   - czemiel
 config:
-  REST_FRAMEWORK_KEY:
+  ADMIN_USERS:
     description: |
-      Your secret key for configuration options
-      Example: 1je1je9jqw9j891r8wp89rh8p#!$!#4-1341
+      Comma separated username list for example
+      Example: example@mail.com,example2@mail.com,admin
+    required: false
+  SUPERUSER:
+    description: |
+      Superuser username
+    example: example@mail.com
     required: true
+  SUPERUSER_PASSWORD:
+    description: |
+      Superuser password
+    example: 'password#!#!kk'
+    required: true
+
 classes:
   rest_framework_config_class:
     - name: config
       type: object
+  dummy:
+    - name: name
+      type: string
+      filter_index: true
+    - name: number
+      type: integer
+      filter_index: true
+    - name: float
+      type: float
+      filter_index: true
+    - name: config
+      type: reference
+      target: rest_framework_config_class
+      filter_index: true
+    - name: file
+      type: file
+    - name: configrel
+      type: relation
+      target: rest_framework_config_class
+      filter_index: true
+    - name: bool
+      type: boolean
+      filter_index: true
+    - name: date
+      type: datetime
+      filter_index: true
+    - name: geo
+      type: geopoint
+      filter_index: true
+    - name: textfield
+      type: text
+    - name: dummyowner
+      type: reference
+      target: user
+      filter_index: true
+    
 endpoints:
+  schema:
+    description: Get models schema
+    file: schema.js
+    parameters:
+      key:
+        type: string
+        description: your REST_FRAMEWORK_KEY
+        example: 13-31sd1je1je9jqw9j891r8wp89rh8p
   getconfig:
     description: Get rest api configuration
     file: getconfig.js
@@ -207,45 +262,9 @@ endpoints:
         - exit_code: 403
           description: Unauthorized
           example: You don't have permission
-  migrate:
-    description: Install whole objects table to your rest-framework/database
-    file: migrate.js
-    parameters:
-      model:
-        type: string
-        description: name of class to remove object from
-        example: strings
-        required: true
-      link:
-        type: string
-        description: public link to another rest object service
-        example: 'http://restservice.com/mymodel/objects/'
-        required: true
-      key:
-        type: string
-        description: your REST_FRAMEWORK_KEY
-        example: 231431dsaojdsaiur47813t
-        required: true
-      header:
-        type: string
-        description: Name of the header for authorization in your link
-        example: 'Authorization:'
-        required: false
-      token:
-        type: string
-        description: Token needed for authorization in your link
-        example: dadsa17623t61374y1hsauij
-        required: false
-    response:
-      mimetype: text/plain
-      examples:
-        - exit_code: 200
-          description: Success
-          example: |
-            {
-              id: 1,
-              name: 'object_name'
-            }
-        - exit_code: 403
-          description: Unauthorized
-          example: You don't have permission
+  isAdmin:
+    description: Checks if user is admin
+    file: isadmin.js
+  install:
+    description: Installs superuser into backend
+    file: install.js

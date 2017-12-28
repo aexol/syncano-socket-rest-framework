@@ -1,43 +1,26 @@
-import {transform} from './helpers/transform'
-import {getPermissions} from './helpers/permissions.js'
-import Server from 'syncano-server'
-export default ctx => {
+import { getPermissions } from './helpers/permissions.js'
+import Server from '@syncano/core'
+import { toFormData } from './helpers/utils'
+import { errors } from './helpers/messages'
+import ownership from './helpers/ownership'
+
+export default async ctx => {
   const server = Server(ctx)
-  const {data, users, socket, response, event, logger, instance} = server
-  const {model, id} = ctx.args
-  const modelData = transform(
-    typeof ctx.args.data === 'string'
-      ? JSON.parse(ctx.args.data)
-      : ctx.args.data
-  )
-  async function updateUserModel ({user, owner}) {
-    try {
-      let ownedModel = await data[model]
-        .where(owner, user)
-        .where('id', id)
-        .firstOrFail()
-      await updateModel()
-    } catch (error) {
-      response.json(error)
+  const { data, response } = server
+  const { model, id, ...modelData } = ctx.args
+  try {
+    let canUpdate = await getPermissions('u', ctx)
+    let { owners } = canUpdate
+    if (owners) {
+      canUpdate = await ownership(ctx, owners)
     }
+    if (!canUpdate) {
+      return response.json({ message: errors(403) }, 403)
+    }
+    return response.json(
+      await data[model].update(id, toFormData(modelData))
+    )
+  } catch (error) {
+    return response.json({ message: error.message }, 400)
   }
-  async function updateModel () {
-    try {
-      response.json(await data[model].update(id, modelData))
-    } catch (error) {
-      response.json(error)
-    }
-  }
-  async function update () {
-    const canUpdate = await getPermissions(model, 'u', ctx.meta.user, server)
-    if (canUpdate.user) {
-      await updateUserModel(canUpdate)
-    }
-    if (canUpdate) {
-      await updateModel()
-    } else {
-      response.json('Insufficent privileges')
-    }
-  }
-  update()
 }

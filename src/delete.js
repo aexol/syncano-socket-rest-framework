@@ -1,39 +1,25 @@
-import {getPermissions} from './helpers/permissions.js'
-import Server from 'syncano-server'
-export default ctx => {
+import { getPermissions } from './helpers/permissions.js'
+import Server from '@syncano/core'
+import { errors } from './helpers/messages'
+import ownership from './helpers/ownership'
+
+export default async ctx => {
   const server = Server(ctx)
-  const {data, users, socket, response, event, logger, instance} = server
-  const {model, id} = ctx.args
-
-  del()
-
-  async function deleteUserModel ({user, owner}) {
-    try {
-      let ownedModel = await data[model]
-        .where(owner, user)
-        .where('id', id)
-        .firstOrFail()
-      await deleteModel()
-    } catch (error) {
-      response.json(error)
+  const { data, response } = server
+  const { model, id } = ctx.args
+  try {
+    let canUpdate = await getPermissions('u', ctx)
+    let { owners } = canUpdate
+    if (owners) {
+      canUpdate = await ownership(ctx, owners)
     }
-  }
-  async function deleteModel () {
-    try {
-      response.json(await data[model].delete(id))
-    } catch (error) {
-      response.json(error)
+    if (!canUpdate) {
+      return response.json({ message: errors(403) }, 403)
     }
-  }
-  async function del () {
-    const canDelete = await getPermissions(model, 'd', ctx.meta.user, server)
-    if (canDelete.user) {
-      await deleteUserModel(canDelete)
-    }
-    if (canDelete) {
-      await deleteModel()
-    } else {
-      response.json('Insufficent privileges')
-    }
+    return response.json(
+      await data[model].delete(id)
+    )
+  } catch (error) {
+    return response.json({ message: error.message }, 400)
   }
 }

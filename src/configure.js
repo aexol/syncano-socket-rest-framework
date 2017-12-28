@@ -1,32 +1,30 @@
-import Server from 'syncano-server'
-export default (ctx) =>{
-  const {data, users, socket, response, event, logger,instance} = Server(ctx);
-  const {config, key} = ctx.args
-  const {REST_FRAMEWORK_KEY} = ctx.config
-  if (key === REST_FRAMEWORK_KEY) {
-    createOrUpdate()
-  } else {
-    response.json({
-      status: 'Incorrect rest framework key'
-    })
+import Server from '@syncano/core'
+import isAdminUser from './helpers/isAdminUser'
+export default async ctx => {
+  const { data, response } = Server(ctx)
+  const { config } = ctx.args
+  if (isAdminUser(ctx)) {
+    return createOrUpdate()
   }
   async function createOrUpdate () {
     try {
       let firstConfigObject = await data.rest_framework_config_class.firstOrFail()
       try {
-        response.json(
+        return response.json(
           await data.rest_framework_config_class.update(firstConfigObject.id, {
             config
           })
         )
       } catch (badResponse) {
-        response.json({
+        return response.json({
           badResponse,
           status: 'bad json format'
         })
       }
     } catch (badResponse) {
-      response.json(await data.rest_framework_config_class.create({config}))
+      return response.json(
+        await data.rest_framework_config_class.create({ config })
+      )
     }
   }
 }

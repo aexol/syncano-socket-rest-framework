@@ -1,66 +1,41 @@
-export async function getPermissions (model, permission_type, user, server) {
-  const {data, response} = server
-  const ccc = await getConfig()
-  const {models = [], logged_in = [], object_level = []} = ccc
-  if (models.indexOf(model) === -1) {
-    notInModels()
+import Server from '@syncano/core'
+import isAdminUser from './isAdminUser'
+export const getPermissions = async (permissionType, ctx) => {
+  if (isAdminUser(ctx)) {
+    return true
   }
-  try {
-    const loggedInPermissions = logged_in.filter(
-      p => hasPermission(p, permission_type) && p.model === model
-    )
-    if (loggedInPermissions.length && typeof user === undefined) {
-      notLoggedIn()
-    }
-    for (let p of loggedInPermissions) {
-      if (p.users && p.users.indexOf(user.id) === -1) {
-        notAnOwner()
-      }
-    }
-    const objectLevelPermissions = object_level.filter(
-      p => hasPermission(p, permission_type) && p.model === model
-    )
-    if (objectLevelPermissions.length && typeof user === undefined) {
+  const { model } = ctx.args
+  const { user } = ctx.meta
+  const { data, response } = Server(ctx)
+  const configModel = (await data.rest_framework_config_class.firstOrFail()).config
+  const { models = [], logged_in = [], object_level = [] } = configModel
+  const everyBodyPermissions = models.filter(
+    p => hasPermission(p, permissionType) && p.model === model
+  )
+  if (everyBodyPermissions.length) {
+    return true
+  }
+  // Check logged in users permissions
+  const loggedInPermissions = logged_in.filter(
+    p => hasPermission(p, permissionType) && p.model === model
+  )
+  if (loggedInPermissions.length && !user) {
+    return false
+  }
+  // Check object level permissions
+  const objectLevelPermissions = object_level.filter(
+    p => hasPermission(p, permissionType) && p.model === model
+  )
+  if (objectLevelPermissions.length) {
+    if (!user) {
       return false
     }
-    for (let p of objectLevelPermissions) {
-      return {
-        user,
-        owner: p.owner_field
-      }
+    return {
+      owners: objectLevelPermissions.map(p => p.owner)
     }
-    return true
-  } catch ({data}) {
-    return true
   }
-  function hasPermission (o, p) {
+  return false
+  function hasPermission(o, p) {
     return o.type.indexOf(p) !== -1
-  }
-  function notLoggedIn (response) {
-    response.json({
-      status: 403,
-      error: 'User not logged in'
-    })
-  }
-  function notAnOwner (response) {
-    response.json({
-      status: 403,
-      error: 'This user is not an owner user of this model'
-    })
-  }
-  function notInModels (response) {
-    response.json({
-      status: 403,
-      error: 'This model is not added to rest-framework socket config. Please add it to models'
-    })
-  }
-  async function getConfig () {
-    try {
-      return (await data.rest_framework_config_class.firstOrFail()).config
-    } catch (badResponse) {
-      response.json({
-        status: 'No config. Please configure rest framework: s call rest-framework/configure'
-      })
-    }
   }
 }

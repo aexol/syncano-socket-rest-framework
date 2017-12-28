@@ -8,7 +8,16 @@ Syncano socket for easy peasy rest framework
 Example parameters of configuration
 ```
 {
-  models: ["book","author","post"],
+  models: [
+    {
+      model: "book",
+      type: "r"
+    },
+    {
+      model: "author",
+      type: "r"
+    }
+  ],
   logged_in: [
     {
       model: "book",
@@ -23,17 +32,17 @@ Example parameters of configuration
     {
       model: "post",
       type: "ud",
-      owner_field:"user"
+      owner:"user"
     },
     {
       model: "author",
       type: "ud",
-      owner_field:"user"
+      owner:"user"
     },
     {
       model: "book",
       type: "ud",
-      owner_field:"user"
+      owner:"user"
     }
   ]
 }

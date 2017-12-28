@@ -1,31 +1,34 @@
-import {getPermissions} from './helpers/permissions.js'
-import Server from 'syncano-server'
-export default ctx => {
+import { getPermissions } from './helpers/permissions.js'
+import Server from '@syncano/core'
+import { errors } from './helpers/messages'
+export default async ctx => {
   const server = Server(ctx)
-  const {data, users, socket, response, event, logger, instance} = server
-  const {model} = ctx.args
-  async function listUserModel ({user, owner}) {
-    try {
-      response.json(await data[model].where(owner, user))
-    } catch (error) {
-      response.json(error)
+  const { data, response } = server
+  const { model, filter } = ctx.args
+  const { user } = ctx.meta
+  try {
+    const canSee = await getPermissions('r', ctx)
+    let query = data[model]
+    let { owners } = canSee
+    if (filter) {
+      filter.forEach(f => {
+        query = query.where(...f)
+      })
     }
-  }
-  async function listModel () {
-    try {
-      response.json(await data[model].list())
-    } catch (error) {
-      response.json(error)
-    }
-  }
-  async function show () {
-    const canSee = await getPermissions(model, 'r', ctx.meta.user, server)
-    if (canSee.user) {
-      await listUserModel(canSee)
+    if (owners) {
+      return response.json((await Promise.all(owners.map(async o =>
+        query.where(o, user.id).list()
+      ))).reduce((a, b) => [...a, ...b]))
     }
     if (canSee) {
-      await listModel()
+      return response.json(
+        await query.list()
+      )
     }
+    return response.json({ message: errors(403) }, 403)
+  } catch (error) {
+    return response.json({
+      message: error.message
+    }, 400)
   }
-  show()
 }
