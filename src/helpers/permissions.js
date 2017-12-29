@@ -19,8 +19,8 @@ export const getPermissions = async (permissionType, ctx) => {
   const loggedInPermissions = logged_in.filter(
     p => hasPermission(p, permissionType) && p.model === model
   )
-  if (loggedInPermissions.length && !user) {
-    return false
+  if (loggedInPermissions.length && user) {
+    return true
   }
   // Check object level permissions
   const objectLevelPermissions = object_level.filter(

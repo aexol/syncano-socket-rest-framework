@@ -16,8 +16,11 @@ export default async ctx => {
     if (!canUpdate) {
       return response.json({ message: errors(403) }, 403)
     }
+    await data[model].delete(id)
     return response.json(
-      await data[model].delete(id)
+      {
+        id
+      }
     )
   } catch (error) {
     return response.json({ message: error.message }, 400)
